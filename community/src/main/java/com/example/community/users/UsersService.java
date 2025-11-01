@@ -1,7 +1,7 @@
 package com.example.community.users;
 
 import com.example.community.users.dto.*;
-import com.example.community.users.entity.UserEntity;
+import com.example.community.users.entity.Users;
 import com.example.community.validator.DomainValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,14 +61,13 @@ public class UsersService {
         }
 
         // 데이터 저장
-        UserEntity userEntity = UserEntity.builder()
-                .userEmail(email)
-                .userPassword(password)
-                .userNickname(nickname)
-                .userProfileImgUrl(profileImgUrl)
-                .userCreatedAt(createdAt)
-                .userIsDeleted(false).build();
-        repository.save(userEntity);
+        Users users = Users.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .profileImgUrl(profileImgUrl)
+                .build();
+        repository.save(users);
 
         return SignUpResponse.create(email, nickname, createdAt);
     }
@@ -95,30 +94,30 @@ public class UsersService {
         return authInfoMap;
     }
 
-    public void verifyPassword(UserEntity userEntity, String givenPassword){
-        if(!userEntity.isPasswordMatch(givenPassword)){
+    public void verifyPassword(Users users, String givenPassword){
+        if(!users.isPasswordMatch(givenPassword)){
             throw new UserException.WrongPasswordException("잘못된 비밀번호입니다.");
         }
     }
 
-    private UserEntity getUserEntityByEmail(String email){
-        UserEntity userEntity = repository.findByEmail(email)
+    private Users getUserEntityByEmail(String email){
+        Users users = repository.findByEmail(email)
                 .orElseThrow(() -> new UserException.UserNotFoundException("존재하지 않는 사용자입니다."));
 
-        if (userEntity.getUserIsDeleted()){
+        if (users.getIsDeleted()){
             throw new UserException.UserNotFoundException("탈퇴한 유저입니다.");
         }
-        return userEntity;
+        return users;
     }
 
-    private UserEntity getUserEntityById(Long id){
-        UserEntity userEntity = repository.findById(id)
+    private Users getUserEntityById(Long id){
+        Users users = repository.findById(id)
                 .orElseThrow(() -> new UserException.UserNotFoundException("존재하지 않는 사용자입니다."));
 
-        if (userEntity.getUserIsDeleted()){
+        if (users.getIsDeleted()){
             throw new UserException.UserNotFoundException("탈퇴한 유저입니다.");
         }
-        return userEntity;
+        return users;
     }
 
     public SignInResponse signIn(SignInRequest signInRequest) {
@@ -126,13 +125,13 @@ public class UsersService {
         String email = signInRequest.getUserEmail();
         String password = signInRequest.getUserPassword();
 
-        UserEntity userEntity = getUserEntityByEmail(email);
-        verifyPassword(userEntity, password);
+        Users users = getUserEntityByEmail(email);
+        verifyPassword(users, password);
 
         Map<String,String> authInfoMap = getAuthInfoMap();
 
         return new SignInResponse(
-                userEntity.getUserEmail(),
+                users.getEmail(),
                 authInfoMap.get("issuedAt"),
                 authInfoMap.get("expiresIn")
         );
@@ -142,9 +141,9 @@ public class UsersService {
         String oldPassword = editPasswordRequest.getUserOldPassword();
         String newPassword = editPasswordRequest.getUserNewPassword();
 
-        UserEntity userEntity = getUserEntityById(id);
+        Users users = getUserEntityById(id);
 
-        String realOldPassword = userEntity.getUserPassword();
+        String realOldPassword = users.getPasswordHash();
 
         if (!oldPassword.equals(realOldPassword)) {
             throw new UserException.InvalidCurrentPasswordException("잘못된 비밀번호입니다.");
@@ -154,21 +153,21 @@ public class UsersService {
             throw new UserException.SamePasswordException("현재 비밀번호와 새 비밀번호가 동일합니다.");
         }
 
-        repository.editPassword(userEntity, newPassword);
+        repository.editPassword(users, newPassword);
 
         return new SimpleResponse(
-                userEntity.getUserId(),
-                userEntity.getUserNickname()
+                users.getId(),
+                users.getNickname()
         );
     }
 
     public SimpleResponse editProfile(Long id, EditProfileRequest editProfileRequest) {
-        UserEntity userEntity = getUserEntityById(id);
+        Users users = getUserEntityById(id);
 
         String newNickname = editProfileRequest.getUserNickname();
         String newProfileImgUrl = editProfileRequest.getUserProfileImgUrl();
 
-        if (newNickname.equals(userEntity.getUserNickname())) {
+        if (newNickname.equals(users.getNickname())) {
             throw new UserException.SameNicknameException("이전 닉네임과 동일합니다.");
         };
 
@@ -176,33 +175,33 @@ public class UsersService {
             throw new UserException.UserNicknameAlreadyExistsException("존재하는 닉네임입니다.");
         }
 
-        if (newProfileImgUrl != "" & newProfileImgUrl.equals(userEntity.getUserProfileImgUrl())) {
+        if (newProfileImgUrl != "" & newProfileImgUrl.equals(users.getProfileImgUrl())) {
             throw new UserException.SameProfileImgException("이전 프로필 사진과 동일합니다.");
         }
 
         repository.editProfile(
-                userEntity,
+                users,
                 newNickname,
                 newProfileImgUrl
         );
 
         return new SimpleResponse(
-                userEntity.getUserId(),
-                userEntity.getUserNickname()
+                users.getId(),
+                users.getNickname()
         );
     }
 
     public SimpleResponse softDelete(Long id) {
-        UserEntity userEntity = getUserEntityById(id);
+        Users users = getUserEntityById(id);
 
-        if (userEntity.getUserIsDeleted()) {
+        if (users.getIsDeleted()) {
             throw new UserException.UserNotFoundException("존재하지 않는 사용자입니다.");
         }
 
-        repository.softDelete(userEntity);
+        repository.softDelete(users);
         return new SimpleResponse(
-                userEntity.getUserId(),
-                userEntity.getUserNickname()
+                users.getId(),
+                users.getNickname()
         );
     }
 

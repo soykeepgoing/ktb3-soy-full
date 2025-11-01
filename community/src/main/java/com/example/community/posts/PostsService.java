@@ -1,9 +1,9 @@
 package com.example.community.posts;
 
 import com.example.community.posts.dto.*;
-import com.example.community.posts.entity.PostEntity;
+import com.example.community.posts.entity.Posts;
 import com.example.community.users.UserException;
-import com.example.community.users.entity.UserEntity;
+import com.example.community.users.entity.Users;
 import com.example.community.users.UserCsvRepository;
 import com.example.community.common.dto.SimpleResponse;
 import com.example.community.validator.DomainValidator;
@@ -32,27 +32,27 @@ public class PostsService {
         this.domainValidator = postValidator;
     }
 
-    private void verifyUser(UserEntity userEntity) {
-        if (userEntity.getUserIsDeleted()){
+    private void verifyUser(Users users) {
+        if (users.getIsDeleted()){
             throw new PostException.PostGoneException("게시글을 찾을 수 없습니다.");
         }
     }
 
-    public UserEntity findUserById(Long id){
+    public Users findUserById(Long id){
         return userCsvRepository.findById(id).orElseThrow(()-> new UserException.UserNotFoundException("존재하지 않는 사용자입니다."));
     }
 
-    public PostEntity findPostById(Long id){
+    public Posts findPostById(Long id){
         return postCsvRepository.findById(id)
                 .orElseThrow(() -> new PostException.PostNotFoundException("존재하지 않는 게시글입니다."));
     }
 
     public PostDetailResponse viewPostDetail(Long postId) {
         domainValidator.validatePostExistById(postId);
-        PostEntity postEntity = findPostById(postId);
-        UserEntity writerEntity = findUserById(postEntity.getPostWriterId());
+        Posts posts = findPostById(postId);
+        Users writerEntity = findUserById(posts.getPostWriterId());
         verifyUser(writerEntity);
-        PostDetailResponse poseDetailResponse = PostAssembler.toDetailResponse(postEntity, writerEntity);
+        PostDetailResponse poseDetailResponse = PostAssembler.toDetailResponse(posts, writerEntity);
         return poseDetailResponse;
     }
 
@@ -71,18 +71,18 @@ public class PostsService {
         }
     }
 
-    private List<PostItemResponse> getPostItemResponseList(List<PostEntity> postEntityList){
-        List<Long> uniqueWriterIds = postEntityList.stream().map(PostEntity::getPostWriterId).collect(Collectors.toList());
-        Map<Long, UserEntity> uniqueWriterMap = userCsvRepository.findAllByIds(uniqueWriterIds)
-                .stream().collect(Collectors.toMap(UserEntity::getUserId, Function.identity()));
-        return postEntityList.stream()
+    private List<PostItemResponse> getPostItemResponseList(List<Posts> postsList){
+        List<Long> uniqueWriterIds = postsList.stream().map(Posts::getPostWriterId).collect(Collectors.toList());
+        Map<Long, Users> uniqueWriterMap = userCsvRepository.findAllByIds(uniqueWriterIds)
+                .stream().collect(Collectors.toMap(Users::getId, Function.identity()));
+        return postsList.stream()
                 .map(post -> PostAssembler.toPostItemResponse(post, uniqueWriterMap.get(post.getPostWriterId())))
                 .toList();
     }
 
-    private List<Long> extractWriterIds(List<PostEntity> postEntityList){
-        return postEntityList.stream()
-                .map(PostEntity::getPostWriterId)
+    private List<Long> extractWriterIds(List<Posts> postsList){
+        return postsList.stream()
+                .map(Posts::getPostWriterId)
                 .collect(Collectors.toList());
     }
 
@@ -103,7 +103,7 @@ public class PostsService {
 
         verifyPagination(totalPages, totalPosts, pageNumber, pageSize);
 
-        List<PostEntity> paginatedPosts = postCsvRepository.findPagedPosts(startPageId, endPageId);
+        List<Posts> paginatedPosts = postCsvRepository.findPagedPosts(startPageId, endPageId);
         List<PostItemResponse> postItemResponseList = getPostItemResponseList(paginatedPosts);
 
         PagingMetaResponse pagingMetaResponse = PagingMetaResponse.builder()
@@ -123,12 +123,12 @@ public class PostsService {
     public PostCreateResponse createPost(Long userId, PostCreateRequest postCreateRequest) {
         postCreateRequest.updatePostImageUrl(postCreateRequest.getPostImageUrl());
 
-        UserEntity writerEntity = userCsvRepository.findNotDeletedById(userId)
+        Users writerEntity = userCsvRepository.findNotDeletedById(userId)
                 .orElseThrow(() -> new PostException.PostNotAuthorizedException("게시글을 작성할 수 없습니다."));
 
-        PostEntity postEntity = PostAssembler.toEntity(postCreateRequest, userId);
-        postCsvRepository.save(postEntity);
-        Long postId = postEntity.getPostId();
+        Posts posts = PostAssembler.toEntity(postCreateRequest, userId);
+        postCsvRepository.save(posts);
+        Long postId = posts.getPostId();
         return PostCreateResponse.of(postId);
     }
 
@@ -140,16 +140,16 @@ public class PostsService {
         }
     }
 
-    public void editPostTitle(PostEntity postEntity, String newTitle) {
-        postEntity.updatePostTitle(newTitle);
+    public void editPostTitle(Posts posts, String newTitle) {
+        posts.updatePostTitle(newTitle);
     }
 
-    public void editPostContent(PostEntity postEntity, String newContent) {
-        postEntity.updatePostContent(newContent);
+    public void editPostContent(Posts posts, String newContent) {
+        posts.updatePostContent(newContent);
     }
 
-    public void editPostImgUrl(PostEntity postEntity, String newImageUrl) {
-        postEntity.updatePostImgUrl(newImageUrl);
+    public void editPostImgUrl(Posts posts, String newImageUrl) {
+        posts.updatePostImgUrl(newImageUrl);
     }
 
     public void ensureUserIsPostWriter(Long postWriterId, Long userId){
@@ -160,20 +160,20 @@ public class PostsService {
 
     public SimpleResponse editPost(Long postId, Long userId, PostEditRequest postEditRequest) {
         domainValidator.validatePostExistById(postId);
-        PostEntity postEntity = findPostById(postId);
-        ensureUserIsPostWriter(postEntity.getPostWriterId(), userId);
+        Posts posts = findPostById(postId);
+        ensureUserIsPostWriter(posts.getPostWriterId(), userId);
         validatePostEditRequest(postEditRequest);
-        editPostTitle(postEntity, postEditRequest.getPostTitle());
-        editPostContent(postEntity, postEditRequest.getPostContent());
-        editPostImgUrl(postEntity, postEditRequest.getPostImageUrl());
-        postCsvRepository.edit(postEntity);
+        editPostTitle(posts, postEditRequest.getPostTitle());
+        editPostContent(posts, postEditRequest.getPostContent());
+        editPostImgUrl(posts, postEditRequest.getPostImageUrl());
+        postCsvRepository.edit(posts);
         return SimpleResponse.forEditPost(userId, postId);
     }
 
     public SimpleResponse deletePost(Long postId, Long userId) {
         domainValidator.validatePostExistById(postId);
-        PostEntity postEntity = findPostById(postId);
-        ensureUserIsPostWriter(postEntity.getPostWriterId(), userId);
+        Posts posts = findPostById(postId);
+        ensureUserIsPostWriter(posts.getPostWriterId(), userId);
         postCsvRepository.delete(postId);
         return SimpleResponse.forDeletePost(userId, postId);
     }

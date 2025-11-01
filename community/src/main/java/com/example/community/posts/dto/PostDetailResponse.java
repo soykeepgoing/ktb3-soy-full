@@ -1,6 +1,6 @@
 package com.example.community.posts.dto;
 
-import com.example.community.posts.entity.PostCounts;
+import com.example.community.posts.entity.PostStats;
 import com.example.community.users.entity.WriterSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -27,7 +27,7 @@ public class PostDetailResponse {
     private String postCreatedAt;
 
     @Schema(description = "게시글 개수 정보", example = "{likes:10, views:10, comments:10}")
-    private PostCounts postCounts;
+    private PostStats postStats;
 
     @Schema(description = "게시글 작성자 정보", example = "{userID: 1, userNickname: test1, userProfileImgUrl: 'https://example.com/users/1/profile-image.png'}")
     private WriterSummary writerSummary;

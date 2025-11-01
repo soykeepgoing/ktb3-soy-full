@@ -6,8 +6,7 @@ import com.example.community.posts.PostException;
 import com.example.community.posts.PostRepository;
 import com.example.community.users.UserException;
 import com.example.community.users.UserRepository;
-import com.example.community.users.entity.UserEntity;
-import org.apache.catalina.User;
+import com.example.community.users.entity.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +28,10 @@ public class DomainValidator {
     }
 
     public void validateUserExistById(Long userId) {
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
+        Users users = userRepository.findById(userId).orElseThrow(
                 () -> new UserException.UserNotFoundException("존재하지 않는 유저입니다.")
         );
-        if (userEntity.getUserIsDeleted()){
+        if (users.getIsDeleted()){
             throw new UserException.UserNotFoundException("탈퇴한 유저입니다.");
         }
     }

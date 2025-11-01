@@ -1,5 +1,6 @@
 package com.example.community.users;
-import com.example.community.users.entity.UserEntity;
+import com.example.community.Utility;
+import com.example.community.users.entity.Users;
 import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
@@ -12,31 +13,27 @@ import java.util.stream.Collectors;
 
 @Repository
 public class UserCsvRepository implements UserRepository {
-    public final Map<Long, UserEntity> userStore = new LinkedHashMap<>();
+    public final Map<Long, Users> userStore = new LinkedHashMap<>();
     private AtomicLong sequence = new AtomicLong(0);
 
-    private UserEntity createUserDto(String line){
+    private Users createUserDto(String line){
         String[] parts = line.split(",", -1);
         Long userId = Long.valueOf(parts[0]);
         String userEmail = parts[1];
-        String userPassword = parts[2];
+        String userPasswordHash = Utility.getHashedPassword(parts[2]);
         String userNickname = parts[3];
         String userProfilePic = parts[4];
         Boolean userIsDeleted = Boolean.valueOf(parts[5]);
         String userCreatedAt = parts[6];
         String userDeletedAt = null;
 
-        UserEntity userEntity = UserEntity.builder()
-                .userId(userId)
-                .userEmail(userEmail)
-                .userPassword(userPassword)
-                .userNickname(userNickname)
-                .userProfileImgUrl(userProfilePic)
-                .userIsDeleted(userIsDeleted)
-                .userCreatedAt(userCreatedAt)
-                .userDeletedAt(userDeletedAt)
+        Users users = Users.builder()
+                .email(userEmail)
+                .password(userPasswordHash)
+                .nickname(userNickname)
+                .profileImgUrl(userProfilePic)
                 .build();
-        return userEntity;
+        return users;
     }
 
     private void init() throws IOException {
@@ -45,9 +42,9 @@ public class UserCsvRepository implements UserRepository {
         String line;
         bufferedReader.readLine(); // 칼럼행 건너뛰기
         while ((line = bufferedReader.readLine()) != null) {
-            UserEntity userEntity = createUserDto(line);
-            sequence.set(userEntity.getUserId());
-            userStore.put(sequence.get(), userEntity);
+            Users users = createUserDto(line);
+            sequence.set(users.getId());
+            userStore.put(sequence.get(), users);
         }
     }
 
@@ -56,29 +53,29 @@ public class UserCsvRepository implements UserRepository {
     }
 
     @Override
-    public ArrayList<UserEntity> findAll() {return new ArrayList<>(userStore.values());}
+    public ArrayList<Users> findAll() {return new ArrayList<>(userStore.values());}
 
     @Override
-    public Optional<UserEntity> findById(Long id) {
+    public Optional<Users> findById(Long id) {
         return Optional.ofNullable(userStore.get(id));
     }
 
     @Override
-    public Optional<UserEntity> findByNickname(String nickname) {
+    public Optional<Users> findByNickname(String nickname) {
         return userStore.values().stream()
-                .filter(item -> item.getUserNickname().equals(nickname))
+                .filter(item -> item.getNickname().equals(nickname))
                 .findAny();
     }
 
     @Override
-    public Optional<UserEntity> findByEmail(String email) {
+    public Optional<Users> findByEmail(String email) {
         return userStore.values().stream()
-                .filter(item -> item.getUserEmail().equals(email))
+                .filter(item -> item.getEmail().equals(email))
                 .findAny();
     }
 
     @Override
-    public ArrayList<UserEntity> findAllByIds(List<Long> ids) {
+    public ArrayList<Users> findAllByIds(List<Long> ids) {
         return userStore.entrySet().stream()
                 .filter(entry -> ids.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
@@ -86,35 +83,36 @@ public class UserCsvRepository implements UserRepository {
     }
 
 
-    public Optional<UserEntity> findNotDeletedById(Long id) {
-        UserEntity userEntity = userStore.get(id);
-        if (userEntity != null && !userEntity.getUserIsDeleted()){
-            return Optional.of(userEntity);
+    public Optional<Users> findNotDeletedById(Long id) {
+        Users users = userStore.get(id);
+        if (users != null && !users.getIsDeleted()){
+            return Optional.of(users);
         }
         return Optional.empty();
     }
 
     @Override
-    public void editPassword(UserEntity userEntity, String newPassword) {
-        userEntity.updatePassword(newPassword);
-        userStore.put(userEntity.getUserId(), userEntity);
+    public void editPassword(Users users, String newPassword) {
+        String hashedNewPassword = Utility.getHashedPassword(newPassword);
+        users.updatePassword(hashedNewPassword);
+        userStore.put(users.getId(), users);
     }
 
     @Override
-    public void editProfile(UserEntity userEntity, String newNickname, String newProfileImgUrl) {
+    public void editProfile(Users users, String newNickname, String newProfileImgUrl) {
         if (!(newProfileImgUrl == null || newProfileImgUrl.isEmpty())) {
-            userEntity.updateProfileImgUrl(newProfileImgUrl);
+            users.updateProfileImgUrl(newProfileImgUrl);
         }
-        userEntity.updateUserNickname(newNickname);
-        userStore.put(userEntity.getUserId(), userEntity);
+        users.updateUserNickname(newNickname);
+        userStore.put(users.getId(), users);
     }
 
     @Override
-    public UserEntity save(UserEntity userEntity) {
+    public Users save(Users users) {
         long userNextId = sequence.incrementAndGet();
-        userEntity.updateUserId(userNextId);
-        userStore.put(userEntity.getUserId(), userEntity);
-        return userEntity;
+        users.updateUserId(userNextId);
+        userStore.put(users.getId(), users);
+        return users;
     }
 
     @Override
@@ -124,14 +122,14 @@ public class UserCsvRepository implements UserRepository {
 
     @Override
     public void delete(Long id) {
-        UserEntity userEntity = userStore.get(id);
-        userEntity.updateUserIsDeleted(true);
-        userStore.put(userEntity.getUserId(), userEntity);
+        Users users = userStore.get(id);
+        users.updateUserIsDeleted(true);
+        userStore.put(users.getId(), users);
     }
 
     @Override
-    public void softDelete(UserEntity userEntity) {
-        userEntity.updateUserIsDeleted(true);
-        userStore.put(userEntity.getUserId(), userEntity);
+    public void softDelete(Users users) {
+        users.updateUserIsDeleted(true);
+        userStore.put(users.getId(), users);
     }
 }

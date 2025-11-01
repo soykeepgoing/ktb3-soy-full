@@ -1,6 +1,6 @@
 package com.example.community.posts;
 
-import com.example.community.posts.entity.PostEntity;
+import com.example.community.posts.entity.Posts;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
 
@@ -13,10 +13,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class PostCsvRepository implements PostRepository {
-    public final Map<Long, PostEntity> postStore = new LinkedHashMap<>();
+    public final Map<Long, Posts> postStore = new LinkedHashMap<>();
     private AtomicLong sequence = new AtomicLong(0);
 
-    private PostEntity createPostEntity(String line){
+    private Posts createPostEntity(String line){
         String[] parts = line.split(",");
         Long postId = Long.parseLong(parts[0]);
         Long writerId = Long.parseLong(parts[1]);
@@ -28,7 +28,7 @@ public class PostCsvRepository implements PostRepository {
         Long commentCounts = Long.parseLong(parts[7]);
         String createdAt = parts[8];
 
-        return PostEntity.builder()
+        return Posts.builder()
                 .postId(postId)
                 .postWriterId(writerId)
                 .postTitle(title)
@@ -48,9 +48,9 @@ public class PostCsvRepository implements PostRepository {
         String line;
         bufferedReader.readLine(); // 칼럼행 건너뛰기
         while ((line = bufferedReader.readLine()) != null) {
-            PostEntity postEntity = createPostEntity(line);
-            sequence.set(postEntity.getPostId());
-            postStore.put(sequence.get(), postEntity);
+            Posts posts = createPostEntity(line);
+            sequence.set(posts.getPostId());
+            postStore.put(sequence.get(), posts);
         }
     }
 
@@ -59,20 +59,20 @@ public class PostCsvRepository implements PostRepository {
     }
 
     @Override
-    public Optional<PostEntity> findById(Long postId) {
+    public Optional<Posts> findById(Long postId) {
         return Optional.ofNullable(postStore.get(postId));
     }
 
     @Override
-    public ArrayList<PostEntity> findAll() {
+    public ArrayList<Posts> findAll() {
         return new ArrayList<>(postStore.values());
     }
 
     @Override
-    public PostEntity save(PostEntity postEntity) {
-        postEntity.updatePostId(sequence.incrementAndGet());
-        postStore.put(postEntity.getPostId(), postEntity);
-        return postEntity;
+    public Posts save(Posts posts) {
+        posts.updatePostId(sequence.incrementAndGet());
+        postStore.put(posts.getPostId(), posts);
+        return posts;
     }
 
     @Override
@@ -86,29 +86,29 @@ public class PostCsvRepository implements PostRepository {
     }
 
     @Override
-    public void edit(PostEntity postEntity){
-        postStore.put(postEntity.getPostId(), postEntity);
+    public void edit(Posts posts){
+        postStore.put(posts.getPostId(), posts);
     }
 
     @Override
     public void incrementLikeCount(Long postId){
-        PostEntity postEntity = postStore.get(postId);
-        postEntity.updateLikeCounts();
-        postStore.put(postId, postEntity);
+        Posts posts = postStore.get(postId);
+        posts.updateLikeCounts();
+        postStore.put(postId, posts);
     }
 
     @Override
     public void decrementLikeCount(Long postId){
-        PostEntity postEntity = postStore.get(postId);
-        postEntity.decrementLikeCount();
-        postStore.put(postId, postEntity);
+        Posts posts = postStore.get(postId);
+        posts.decrementLikeCount();
+        postStore.put(postId, posts);
     }
 
     @Override
-    public List<PostEntity> findPagedPosts(Long startPageId, Long endPageId){
-        List<PostEntity> sortedPostEntityList = postStore.values().stream().sorted(
-                Comparator.comparing(PostEntity::getPostCreatedAt).reversed()
+    public List<Posts> findPagedPosts(Long startPageId, Long endPageId){
+        List<Posts> sortedPostsList = postStore.values().stream().sorted(
+                Comparator.comparing(Posts::getPostCreatedAt).reversed()
         ).toList();
-        return sortedPostEntityList.subList(Math.toIntExact(startPageId), Math.toIntExact(endPageId));
+        return sortedPostsList.subList(Math.toIntExact(startPageId), Math.toIntExact(endPageId));
     }
 }
