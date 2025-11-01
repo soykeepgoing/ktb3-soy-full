@@ -1,37 +1,54 @@
 package com.example.community.users.entity;
 
 import com.example.community.Utility;
+import com.example.community.comments.entity.Comments;
+import com.example.community.likes.entity.CommentLikes;
+import com.example.community.likes.entity.PostLikes;
 import com.example.community.posts.entity.Posts;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
+
+    @Column(name = "password_hash", length = 60, nullable = false)
     private String passwordHash;
+
+    @Column(name = "nickname", length = 10, nullable = false, unique = true)
     private String nickname;
+
+    @Column(name = "profile_img_url", length = 2048)
     private String profileImgUrl;
+
+    @Column(name = "isDeleted")
     private Boolean isDeleted;
 
-    @OneToMany (mappedBy = "user")
+    @OneToMany(mappedBy = "user")
     private List<Posts> posts;
+
+    @OneToMany(mappedBy = "user")
+    private List<Comments> comments;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<PostLikes> postLikes;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<CommentLikes> commentLikes;
 
     @OneToMany(fetch = FetchType.LAZY)
     private UserDetails userDetail;
-
-
 
     @Builder
     public Users(String email, String password, String nickname, String profileImgUrl){
@@ -64,10 +81,5 @@ public class Users {
 
     public boolean isPasswordMatch(String givenPasswordHash) {
         return BCrypt.checkpw(this.passwordHash, givenPasswordHash);
-    }
-
-    @Override
-    public String toString() {
-        return "%d %s %s %s %s %s %s".formatted(id, email, passwordHash, nickname, profileImgUrl, createdAt, deletedAt);
     }
 }

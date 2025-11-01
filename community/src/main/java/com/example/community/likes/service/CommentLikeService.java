@@ -1,10 +1,7 @@
 package com.example.community.likes.service;
 
 import com.example.community.comments.CommentsCsvRepository;
-import com.example.community.comments.CommentsException;
-import com.example.community.comments.dto.CommentsEntity;
 import com.example.community.likes.repository.LikeCsvRepository;
-import com.example.community.posts.PostCsvRepository;
 import com.example.community.users.UserCsvRepository;
 import com.example.community.validator.DomainValidator;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,9 @@
 package com.example.community.posts;
 
 import com.example.community.Utility;
-import com.example.community.posts.dto.*;
+import com.example.community.posts.dto.PostCreateRequest;
+import com.example.community.posts.dto.PostDetailResponse;
+import com.example.community.posts.dto.PostItemResponse;
 import com.example.community.posts.entity.PostStats;
 import com.example.community.posts.entity.Posts;
 import com.example.community.users.entity.Users;

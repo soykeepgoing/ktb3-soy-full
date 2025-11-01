@@ -1,6 +1,6 @@
 package com.example.community.comments;
 
-import com.example.community.comments.dto.CommentsEntity;
+import com.example.community.comments.entity.Comments;
 import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 @Repository
 public class CommentsCsvRepository implements CommentsRepository {
-    public final Map<Long, CommentsEntity> commentsStore = new LinkedHashMap<>();
+    public final Map<Long, Comments> commentsStore = new LinkedHashMap<>();
     private AtomicLong sequence = new AtomicLong(0);
 
-    public CommentsEntity createCommentEntity(String line){
+    public Comments createCommentEntity(String line){
         String[] parts = line.split(",", -1);
         Long commentId = parseLong(parts[0]);
         Long parentCommentId = parseLong(parts[1]);
@@ -24,7 +24,7 @@ public class CommentsCsvRepository implements CommentsRepository {
         Long writerId = parseLong(parts[3]);
         String commentContent = parts[4];
         String createdAt = parts[5];
-        return CommentsEntity.builder()
+        return Comments.builder()
                 .commentId(commentId)
                 .parentCommentId(parentCommentId)
                 .postId(postId)
@@ -48,7 +48,7 @@ public class CommentsCsvRepository implements CommentsRepository {
         String line;
         bufferedReader.readLine(); // 칼럼행 건너뛰기
         while ((line = bufferedReader.readLine()) != null) {
-            CommentsEntity commentEntity = createCommentEntity(line);
+            Comments commentEntity = createCommentEntity(line);
             Long id = commentEntity.getCommentId();
             sequence.set(id);
             commentsStore.put(id, commentEntity);
@@ -56,21 +56,21 @@ public class CommentsCsvRepository implements CommentsRepository {
     }
 
     @Override
-    public Optional<CommentsEntity> findById(Long commentId) {
+    public Optional<Comments> findById(Long commentId) {
         return Optional.ofNullable(commentsStore.get(commentId));
     }
 
     @Override
-    public ArrayList<CommentsEntity> findAll() {
+    public ArrayList<Comments> findAll() {
         return new ArrayList<>(commentsStore.values());
     }
 
     @Override
-    public CommentsEntity save(CommentsEntity commentsEntity) {
+    public Comments save(Comments comments) {
         Long newCommentId = sequence.incrementAndGet();
-        commentsEntity.updateId(newCommentId);
-        commentsStore.put(newCommentId, commentsEntity);
-        return commentsEntity;
+        comments.updateId(newCommentId);
+        commentsStore.put(newCommentId, comments);
+        return comments;
     }
 
     @Override
@@ -84,18 +84,18 @@ public class CommentsCsvRepository implements CommentsRepository {
     }
 
     @Override
-    public ArrayList<CommentsEntity> getCommentsByPostId(Long postId) {
-        List<CommentsEntity> commentsEntityList = commentsStore.values().stream()
+    public ArrayList<Comments> getCommentsByPostId(Long postId) {
+        List<Comments> commentsList = commentsStore.values().stream()
                 .filter(commentsEntity -> commentsEntity.getPostId().equals(postId))
                 .collect(Collectors.toList());
-        return new ArrayList<>(commentsEntityList);
+        return new ArrayList<>(commentsList);
     }
 
     @Override
     public void editComment(Long commentId, String newCommentContent) {
-        CommentsEntity commentsEntity = commentsStore.get(commentId);
-        commentsEntity.updateContent(newCommentContent);
-        commentsStore.put(commentsEntity.getCommentId(), commentsEntity);
+        Comments comments = commentsStore.get(commentId);
+        comments.updateContent(newCommentContent);
+        commentsStore.put(comments.getCommentId(), comments);
     }
 
 }

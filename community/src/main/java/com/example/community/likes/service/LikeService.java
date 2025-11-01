@@ -3,7 +3,7 @@ package com.example.community.likes.service;
 import com.example.community.Utility;
 import com.example.community.likes.LikeException;
 import com.example.community.likes.dto.SimpleResponse;
-import com.example.community.likes.entity.LikeEntity;
+import com.example.community.likes.entity.Likes;
 import com.example.community.likes.repository.LikeCsvRepository;
 import com.example.community.users.UserCsvRepository;
 import com.example.community.validator.DomainValidator;
@@ -30,12 +30,12 @@ public abstract class LikeService {
         validateLikes(contentId, userId);
 
         String createdAt = Utility.getCreatedAt();
-        LikeEntity likeEntity = LikeEntity.of(
+        Likes likes = Likes.of(
                 contentId,
                 userId,
                 createdAt
         );
-        likeCsvRepository.save(likeEntity);
+        likeCsvRepository.save(likes);
 
         return SimpleResponse.forLike(
                 this.contentType,

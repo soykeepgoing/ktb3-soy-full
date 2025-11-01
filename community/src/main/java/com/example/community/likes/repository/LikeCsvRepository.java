@@ -1,13 +1,13 @@
 package com.example.community.likes.repository;
 
-import com.example.community.likes.entity.LikeEntity;
+import com.example.community.likes.entity.Likes;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class LikeCsvRepository implements LikeRepository {
-    Map<String, LikeEntity> likeStore = new HashMap<>();
+    Map<String, Likes> likeStore = new HashMap<>();
     String dbPath;
     String contentType;
 
@@ -17,12 +17,12 @@ public abstract class LikeCsvRepository implements LikeRepository {
         return contentId + "-" + userId;
     }
 
-    public LikeEntity createEntityFromLine(String line){
+    public Likes createEntityFromLine(String line){
         line.split(",");
         Long contentId = Long.valueOf(line.split(",")[1]);
         Long userId = Long.valueOf(line.split(",")[2]);
         String createdAt = line.split(",")[3];
-        return LikeEntity.of(contentId, userId, createdAt);
+        return Likes.of(contentId, userId, createdAt);
     }
 
     public void initFromFile() {
@@ -31,15 +31,15 @@ public abstract class LikeCsvRepository implements LikeRepository {
             String line;
             reader.readLine();
             while ((line = reader.readLine()) != null){
-                LikeEntity likeEntity = createEntityFromLine(line);
-                save(likeEntity);
+                Likes likes = createEntityFromLine(line);
+                save(likes);
             }
         } catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
-    public LikeEntity save(LikeEntity entity) {
+    public Likes save(Likes entity) {
         String key = key(entity.getContentId(), entity.getUserId());
         likeStore.put(key, entity);
         return entity;

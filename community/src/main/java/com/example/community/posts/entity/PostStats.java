@@ -12,11 +12,12 @@ import lombok.NoArgsConstructor;
 public class PostStats {
 
     @Id
+    @Column(name = "post_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-
+    @JoinColumn(name="post_id", unique = true, nullable = false)
     private Posts post;
 
     private Long viewCount;

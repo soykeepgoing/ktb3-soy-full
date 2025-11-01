@@ -1,5 +1,6 @@
 package com.example.community.posts;
 
+import com.example.community.contents.posts.dto.*;
 import com.example.community.posts.dto.*;
 import com.example.community.posts.entity.Posts;
 import com.example.community.users.UserException;

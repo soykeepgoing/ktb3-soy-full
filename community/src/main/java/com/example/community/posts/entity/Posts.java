@@ -1,18 +1,17 @@
 package com.example.community.posts.entity;
 
+import com.example.community.comments.entity.Comments;
+import com.example.community.likes.entity.Likes;
 import com.example.community.users.entity.Users;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Comments;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Posts {
     @Id
@@ -31,13 +30,11 @@ public class Posts {
     private String content;
     private String imgUrl;
 
+    @OneToMany(mappedBy = "post")
+    private List<Comments> comments;
+
     private LocalDateTime createdAt;
     private LocalDateTime editedAt;
-
-    @Override
-    public String toString(){
-        return "Post %d".formatted(id);
-    }
 
     public void updatePostId(Long postId) {
         this.id = postId;
