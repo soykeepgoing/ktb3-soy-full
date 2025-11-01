@@ -32,7 +32,7 @@ public class Users {
     @Column(name = "profile_img_url", length = 2048)
     private String profileImgUrl;
 
-    @Column(name = "isDeleted")
+    @Column(name = "is_deleted" )
     private Boolean isDeleted;
 
     @OneToMany(mappedBy = "user")
@@ -47,7 +47,7 @@ public class Users {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<CommentLikes> commentLikes;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user")
     private UserDetails userDetail;
 
     @Builder

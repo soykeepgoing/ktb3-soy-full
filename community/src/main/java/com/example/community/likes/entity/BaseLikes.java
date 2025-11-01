@@ -22,7 +22,10 @@ public abstract class BaseLikes {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private Users user;
 
+    @Column(name = "created_at", nullable=false)
     private LocalDateTime createdAt;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public BaseLikes(Users user) {
         this.user = user;

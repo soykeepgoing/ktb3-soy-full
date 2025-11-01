@@ -10,18 +10,19 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostStats {
-
     @Id
-    @Column(name = "post_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name="post_id", unique = true, nullable = false)
     private Posts post;
 
+    @Column(name = "view_count", nullable = false)
     private Long viewCount;
+    @Column(name = "like_count", nullable = false)
     private Long likeCount;
+    @Column(name = "comment_count", nullable = false)
     private Long commentCount;
 
     @Builder

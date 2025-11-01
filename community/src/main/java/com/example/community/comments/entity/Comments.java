@@ -19,9 +19,6 @@ public class Comments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "body", nullable = false)
-    private String body;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Posts post;
@@ -34,21 +31,26 @@ public class Comments {
     @JoinColumn(name = "parent_id", nullable = true)
     private Comments parentComment;
 
-    @Column(name = "comment_depth", nullable = true)
-    private int commentDepth;
-
     @OneToMany(mappedBy = "parentComment")
     private List<Comments> childrenCommentList;
 
+    @OneToOne(mappedBy = "comment")
+    private CommentStats commentStats;
+
+    @Column(name = "body", nullable = false)
+    private String body;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public void updateId(Long commentId) {
-        this.commentId = commentId;
-    }
+    @Column(name = "comment_depth", nullable = true)
+    private int commentDepth;
 
-    public void updateContent(String commentContent) {
-        this.commentContent = commentContent;
+    @Builder
+    public Comments(String body){
+        this.body = body;
+        this.createdAt = LocalDateTime.now();
     }
-
 }

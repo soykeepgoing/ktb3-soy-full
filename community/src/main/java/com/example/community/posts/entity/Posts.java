@@ -1,7 +1,6 @@
 package com.example.community.posts.entity;
 
 import com.example.community.comments.entity.Comments;
-import com.example.community.likes.entity.Likes;
 import com.example.community.users.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,30 +21,27 @@ public class Posts {
     @JoinColumn(name = "user_id")
     private Users user;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @MapsId
-    private List<PostStats> postStats;
-
-    private String title;
-    private String content;
-    private String imgUrl;
-
     @OneToMany(mappedBy = "post")
     private List<Comments> comments;
 
+    @OneToOne(mappedBy = "post")
+    private PostStats postStats;
+
+    @Column(name = "title", length = 26, nullable = false)
+    private String title;
+    @Column(name = "body", nullable = false)
+    private String body;
+    @Column(name = "img_url", length = 2048)
+    private String imgUrl;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    private LocalDateTime editedAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     public void updatePostId(Long postId) {
         this.id = postId;
-    }
-
-    public void updateLikeCounts() {
-        this.postLikeCounts += 1;
-    }
-
-    public void decrementLikeCount() {
-        this.postLikeCounts -= 1;
     }
 
     public void updatePostTitle(String title) {
@@ -56,7 +52,7 @@ public class Posts {
 
     public void updatePostContent(String content) {
         if (content != null & content != "") {
-            this.content = content;
+            this.body = content;
         }
     }
 
