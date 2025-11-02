@@ -23,7 +23,7 @@ public class UsersSignUpRequest {
     @Length(max=10)
     private String userNickname;
 
-    @URL(message= ConstantUtil.MSG_URL_NOT_VALID)
+    // @URL(message= ConstantUtil.MSG_URL_NOT_VALID)
     private String userProfileImgUrl;
 }
 

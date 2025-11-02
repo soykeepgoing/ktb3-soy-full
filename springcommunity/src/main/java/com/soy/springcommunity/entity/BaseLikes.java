@@ -22,12 +22,16 @@ public abstract class BaseLikes {
     private Users user;
 
     @Column(name = "created_at", nullable=false)
-    private LocalDateTime createdAt;
+    protected LocalDateTime createdAt;
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    protected LocalDateTime deletedAt;
 
     public BaseLikes(Users user) {
         this.user = user;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void deleteLikes(){
+        this.deletedAt = LocalDateTime.now();
     }
 }
