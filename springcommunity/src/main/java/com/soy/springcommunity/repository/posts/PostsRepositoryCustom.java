@@ -5,10 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PostsRepositoryCustom {
     Page<Posts> findPostList(Pageable pageable);
     Page<Posts> findPostListByUserId(Long userId, Pageable pageable);
-    Posts findPostDetailById(Long pageId);
+    Optional<Posts> findPostDetailById(Long pageId);
     List<Posts> searchPosts(String keyword, int limit);
 }

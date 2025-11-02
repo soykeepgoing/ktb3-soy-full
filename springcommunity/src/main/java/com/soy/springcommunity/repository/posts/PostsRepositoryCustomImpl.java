@@ -10,13 +10,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PostsRepositoryCustomImpl implements PostsRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public Posts findPostDetailById(Long postId){
+    public Optional<Posts> findPostDetailById(Long postId){
         EntityGraph entityGraph = entityManager.getEntityGraph("Posts.withUserAndStatsAndComments");
         TypedQuery<Posts> query = entityManager.createQuery(
                 "SELECT p FROM Posts p WHERE p.id = :postId",
@@ -25,7 +26,7 @@ public class PostsRepositoryCustomImpl implements PostsRepositoryCustom {
         query.setParameter("postId", postId);
         query.setHint("jakarta.persistence.fetchgraph", entityGraph);
 
-        return query.getSingleResult();
+        return Optional.ofNullable(query.getSingleResult());
     }
 
     @Override

@@ -5,18 +5,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class UsersApiResponse {
-    public static <T> ResponseEntity<CommonResponse<T>> ok(HttpStatus status, String message, T data) {
+    public static <T> ResponseEntity<ApiCommonResponse<T>> ok(HttpStatus status, String message, T data) {
         return ResponseEntity.status(status)
-                .body(CommonResponse.success(status.value(), message, data));
+                .body(ApiCommonResponse.success(status.value(), message, data));
     }
 
-    public static <T> ResponseEntity<CommonResponse<T>> created(HttpStatus status, String message, T data){
+    public static <T> ResponseEntity<ApiCommonResponse<T>> created(HttpStatus status, String message, T data){
         return ResponseEntity.status(status)
-                .body(CommonResponse.success(status.value(), message, data));
+                .body(ApiCommonResponse.success(status.value(), message, data));
     }
 
-    public static <T> ResponseEntity<CommonResponse<T>> fail(BusinessException e) {
+    public static <T> ResponseEntity<ApiCommonResponse<T>> fail(BusinessException e) {
         return ResponseEntity.status(e.getStatus())
-                .body(CommonResponse.fail(e.getStatus().value(), e.getMessage()));
+                .body(ApiCommonResponse.fail(e.getStatus().value(), e.getMessage()));
     }
 }

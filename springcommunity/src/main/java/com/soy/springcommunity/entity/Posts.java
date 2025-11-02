@@ -57,6 +57,14 @@ public class Posts {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Builder
+    public Posts(String title, String body, String imgUrl, Users user) {
+        this.title = title;
+        this.body = body;
+        this.imgUrl = imgUrl;
+        this.user = user;
+        this.createdAt = LocalDateTime.now();
+    }
 
     public void updatePostId(Long postId) {
         this.id = postId;

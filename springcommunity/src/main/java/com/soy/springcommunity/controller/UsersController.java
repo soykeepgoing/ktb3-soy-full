@@ -26,10 +26,12 @@ public class UsersController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "가입 성공")
     })
-    public ResponseEntity<UsersSignUpResponse> signUp(@Valid @RequestBody UsersSignUpRequest usersSignUpRequest) {
-        System.out.println("???");
+    public ResponseEntity<ApiCommonResponse<UsersSignUpResponse>> signUp(@Valid @RequestBody UsersSignUpRequest usersSignUpRequest) {
         UsersSignUpResponse signUpResponse = usersService.signup(usersSignUpRequest);
-        return new ResponseEntity<>(signUpResponse, HttpStatus.OK);
+        return UsersApiResponse.created(
+                HttpStatus.OK,
+                "회원가입 성공",
+                signUpResponse);
     }
 
     @Operation(summary = "로그인")
@@ -37,7 +39,7 @@ public class UsersController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "로그인 성공")
     })
-    public ResponseEntity<CommonResponse<UsersSignInResponse>> signIn(@Valid @RequestBody UsersSignInRequest UsersSignInRequest) {
+    public ResponseEntity<ApiCommonResponse<UsersSignInResponse>> signIn(@Valid @RequestBody UsersSignInRequest UsersSignInRequest) {
         UsersSignInResponse signInResponse = usersService.signIn(UsersSignInRequest);
         return UsersApiResponse.created(HttpStatus.CREATED,
                 "로그인 성공",
@@ -49,7 +51,7 @@ public class UsersController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공")
     })
-    public ResponseEntity<CommonResponse<UsersSimpleResponse>> editPassword(@PathVariable Long id, @Valid @RequestBody UsersEditPasswordRequest UsersEditPasswordRequest) {
+    public ResponseEntity<ApiCommonResponse<UsersSimpleResponse>> editPassword(@PathVariable Long id, @Valid @RequestBody UsersEditPasswordRequest UsersEditPasswordRequest) {
         UsersSimpleResponse UsersSimpleResponse = usersService.editPassword(id, UsersEditPasswordRequest);
         return UsersApiResponse.ok(HttpStatus.OK,
                 "비밀번호 변경 성공",
@@ -61,7 +63,7 @@ public class UsersController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "프로필 변경 성공")
     })
-    public ResponseEntity<CommonResponse<UsersSimpleResponse>> editProfile(@Valid @RequestBody UsersEditProfileRequest usersEditProfileRequest, @PathVariable Long id) {
+    public ResponseEntity<ApiCommonResponse<UsersSimpleResponse>> editProfile(@Valid @RequestBody UsersEditProfileRequest usersEditProfileRequest, @PathVariable Long id) {
         UsersSimpleResponse UsersSimpleResponse = usersService.editProfile(id, usersEditProfileRequest);
         return UsersApiResponse.ok(HttpStatus.OK,
                 "프로필 변경 성공",
@@ -73,7 +75,7 @@ public class UsersController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "삭제 성공")
     })
-    public ResponseEntity<CommonResponse<UsersSimpleResponse>> softDelete(@PathVariable Long id) {
+    public ResponseEntity<ApiCommonResponse<UsersSimpleResponse>> softDelete(@PathVariable Long id) {
         UsersSimpleResponse UsersSimpleResponse = usersService.softDelete(id);
         return UsersApiResponse.ok(HttpStatus.OK,
                 "회원 삭제 성공",
