@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Table(name = "posts")
 @NamedEntityGraph(
-        name = "Posts.byUser",
+        name = "Posts.WithUser",
         attributeNodes = @NamedAttributeNode("user")
 )
 public class Posts {
