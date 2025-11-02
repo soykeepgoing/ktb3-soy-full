@@ -36,8 +36,14 @@ public class UserDetail {
         this.deletedAt = null;
     }
 
-    public UserDetail of(Users user){
+    public static UserDetail of(Users user) {
         return new UserDetail(user);
     }
+    public void setDeletedAt(){
+        this.deletedAt = LocalDateTime.now();
+    }
 
+    public void setUpdatedAt(){
+        this.updatedAt = LocalDateTime.now();
+    }
 }

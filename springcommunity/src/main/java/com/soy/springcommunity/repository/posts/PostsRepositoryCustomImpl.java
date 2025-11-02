@@ -1,4 +1,4 @@
-package com.soy.springcommunity.repository.post;
+package com.soy.springcommunity.repository.posts;
 
 import com.soy.springcommunity.entity.Posts;
 import jakarta.persistence.EntityGraph;
@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public class PostRepositoryCustomImpl implements PostRepositoryCustom{
+public class PostsRepositoryCustomImpl implements PostsRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 

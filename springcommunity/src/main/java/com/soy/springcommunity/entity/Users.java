@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name="users")
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,22 +58,18 @@ public class Users {
 
     public void updatePassword(String newPasswordHash) {
         this.passwordHash = newPasswordHash;
+        this.userDetail.setUpdatedAt();
     }
 
-    public void updateProfileImgUrl(String newProfileImgUrl) {
-        this.profileImgUrl = newProfileImgUrl;
+    public void softDelete() {
+        this.isDeleted = true;
+        this.userDetail.setDeletedAt();
     }
 
-    public void updateUserNickname(String newNickname) {
+    public void updateProfile(String newNickname, String newImgUrl){
         this.nickname = newNickname;
-    }
-
-    public void updateUserId(Long newUserId) {
-        this.id = newUserId;
-    }
-
-    public void updateUserIsDeleted(Boolean newUserIsDeleted) {
-        this.isDeleted = newUserIsDeleted;
+        this.profileImgUrl = newImgUrl;
+        this.userDetail.setUpdatedAt();
     }
 
     public boolean isPasswordMatch(String givenPasswordHash) {
