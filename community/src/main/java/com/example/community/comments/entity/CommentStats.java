@@ -26,4 +26,14 @@ public class CommentStats {
     @Column(name = "reply_count", nullable = false)
     private Long replyCount;
 
+    private CommentStats(Comments comment, Long likeCount, Long replyCount) {
+        this.comment = comment;
+        this.likeCount = likeCount;
+        this.replyCount = replyCount;
+    }
+
+    public CommentStats of(Comments comment, Long likeCount, Long replyCount) {
+        return new CommentStats(comment, likeCount, replyCount);
+    }
+
 }

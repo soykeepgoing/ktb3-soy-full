@@ -9,11 +9,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder
+@Entity
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
 public class Comments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

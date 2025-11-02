@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "posts")
 public class Posts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
