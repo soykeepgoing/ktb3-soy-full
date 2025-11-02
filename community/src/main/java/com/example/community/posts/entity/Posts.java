@@ -8,11 +8,14 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
 @Getter
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 @Table(name = "posts")
+@NamedEntityGraph(
+        name = "Posts.byUser",
+        attributeNodes = @NamedAttributeNode("user")
+)
 public class Posts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
