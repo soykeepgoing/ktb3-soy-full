@@ -12,9 +12,23 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "posts")
-@NamedEntityGraph(
-        name = "Posts.WithUser",
-        attributeNodes = @NamedAttributeNode("user")
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "Posts.withUserAndStats",
+                attributeNodes = {
+                        @NamedAttributeNode("user"),
+                        @NamedAttributeNode("postStats")
+                }
+        ),
+        @NamedEntityGraph(
+                name = "Posts.withUserAndStatsAndComments",
+                attributeNodes = {
+                        @NamedAttributeNode("user"),
+                        @NamedAttributeNode("postStats"),
+                        @NamedAttributeNode("comments")
+                }
+        )
+    }
 )
 public class Posts {
     @Id

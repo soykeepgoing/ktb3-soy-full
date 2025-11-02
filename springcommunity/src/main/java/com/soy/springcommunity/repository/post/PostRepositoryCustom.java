@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface PostRepositoryCustom {
     Page<Posts> findPostList(Pageable pageable);
-    Page<Posts> findPageByUserId(Long userId, Pageable pageable);
+    Page<Posts> findPostListByUserId(Long userId, Pageable pageable);
+    Posts findPostDetailById(Long pageId);
     List<Posts> searchPosts(String keyword, int limit);
 }

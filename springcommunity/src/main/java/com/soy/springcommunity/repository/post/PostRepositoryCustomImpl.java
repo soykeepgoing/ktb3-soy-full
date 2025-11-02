@@ -16,8 +16,21 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom{
     private EntityManager entityManager;
 
     @Override
+    public Posts findPostDetailById(Long postId){
+        EntityGraph entityGraph = entityManager.getEntityGraph("Posts.withUserAndStatsAndComments");
+        TypedQuery<Posts> query = entityManager.createQuery(
+                "SELECT p FROM Posts p WHERE p.id = :postId",
+                Posts.class
+        );
+        query.setParameter("postId", postId);
+        query.setHint("jakarta.persistence.fetchgraph", entityGraph);
+
+        return query.getSingleResult();
+    }
+
+    @Override
     public Page<Posts> findPostList(Pageable pageable) {
-        EntityGraph entityGraph = entityManager.getEntityGraph("Posts.WithUser");
+        EntityGraph entityGraph = entityManager.getEntityGraph("Posts.withUserAndStats");
         TypedQuery<Posts> query = entityManager.createQuery(
                 "SELECT p FROM Posts p ORDER BY p.createdAt DESC",
                 Posts.class
@@ -31,8 +44,8 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom{
     }
 
     @Override
-    public Page<Posts> findPageByUserId(Long userId, Pageable pageable){
-        EntityGraph entityGraph = entityManager.getEntityGraph("Posts.WithUser");
+    public Page<Posts> findPostListByUserId(Long userId, Pageable pageable){
+        EntityGraph entityGraph = entityManager.getEntityGraph("Posts.withUserAndStats");
 
         TypedQuery<Posts> query = entityManager.createQuery(
                 "SELECT p FROM Posts p WHERE p.user.id = :userId ORDER BY p.createdAt DESC",
