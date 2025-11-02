@@ -1,0 +1,37 @@
+package com.soy.springcommunity.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class CommentStats {
+    @Id
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "comment_id", unique = true, nullable = false)
+    private Comments comment;
+
+    @Column(name = "like_count", nullable = false)
+    private Long likeCount;
+
+    @Column(name = "reply_count", nullable = false)
+    private Long replyCount;
+
+    private CommentStats(Comments comment, Long likeCount, Long replyCount) {
+        this.comment = comment;
+        this.likeCount = likeCount;
+        this.replyCount = replyCount;
+    }
+
+    public CommentStats of(Comments comment, Long likeCount, Long replyCount) {
+        return new CommentStats(comment, likeCount, replyCount);
+    }
+
+}
+
