@@ -4,8 +4,8 @@ import com.soy.springcommunity.dto.*;
 import com.soy.springcommunity.entity.UserDetail;
 import com.soy.springcommunity.entity.Users;
 import com.soy.springcommunity.exception.UsersException;
-import com.soy.springcommunity.repository.users.UserDetailRepository;
-import com.soy.springcommunity.repository.users.UserRepository;
+import com.soy.springcommunity.repository.users.UsersDetailRepository;
+import com.soy.springcommunity.repository.users.UsersRepository;
 import com.soy.springcommunity.utils.ConstantUtil;
 import com.soy.springcommunity.utils.PasswordUtil;
 import jakarta.transaction.Transactional;
@@ -21,22 +21,22 @@ import java.util.Map;
 
 @Service
 public class UsersService {
-    private UserRepository userRepository;
-    private UserDetailRepository userDetailRepository;
+    private UsersRepository usersRepository;
+    private UsersDetailRepository usersDetailRepository;
 
     @Autowired
-    public UsersService(UserRepository userRepository,
-                        UserDetailRepository userDetailRepository) {
-        this.userRepository = userRepository;
-        this.userDetailRepository = userDetailRepository;
+    public UsersService(UsersRepository usersRepository,
+                        UsersDetailRepository usersDetailRepository) {
+        this.usersRepository = usersRepository;
+        this.usersDetailRepository = usersDetailRepository;
     }
 
     private boolean isEmailExist(String email) {
-        return userRepository.findByEmail(email).isPresent();
+        return usersRepository.findByEmail(email).isPresent();
     }
 
     private boolean isNicknameExist(String nickname) {
-        return userRepository.findByNickname(nickname).isPresent();
+        return usersRepository.findByNickname(nickname).isPresent();
     }
 
     private String checkAndSetProfileImage(String profileImgUrl) {
@@ -77,8 +77,8 @@ public class UsersService {
 
         UserDetail userDetail = UserDetail.of(user);
 
-        userRepository.save(user);
-        userDetailRepository.save(userDetail);
+        usersRepository.save(user);
+        usersDetailRepository.save(userDetail);
 
         return UsersSignUpResponse.create(email, nickname, userDetail.getCreatedAt());
     }
@@ -104,7 +104,7 @@ public class UsersService {
     }
 
     private Users getUserEntityByEmail(String email){
-        Users users = userRepository.findByEmail(email)
+        Users users = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
 
         if (users.getIsDeleted()){
@@ -114,7 +114,7 @@ public class UsersService {
     }
 
     private Users findActiveUserById(Long id){
-        Users users = userRepository.findByIdAndIsDeletedFalse(id)
+        Users users = usersRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
         return users;
     }
@@ -173,7 +173,7 @@ public class UsersService {
             throw new UsersException.SameNicknameException("이전 닉네임과 동일합니다.");
         };
 
-        if (userRepository.findByNickname(newNickname).isPresent()) {
+        if (usersRepository.findByNickname(newNickname).isPresent()) {
             throw new UsersException.UsersNicknameAlreadyExistsException("존재하는 닉네임입니다.");
         }
 

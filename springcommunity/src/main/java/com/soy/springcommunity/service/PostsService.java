@@ -6,32 +6,28 @@ import com.soy.springcommunity.entity.Users;
 import com.soy.springcommunity.exception.PostsException;
 import com.soy.springcommunity.exception.UsersException;
 import com.soy.springcommunity.repository.posts.PostsRepository;
-import com.soy.springcommunity.repository.users.UserRepository;
-import jakarta.persistence.Id;
+import com.soy.springcommunity.repository.users.UsersRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class PostsService {
     private PostsRepository postsRepository;
-    private UserRepository userRepository;
+    private UsersRepository usersRepository;
     @Autowired
     public PostsService(PostsRepository postsRepository,
-                        UserRepository userRepository) {
+                        UsersRepository usersRepository) {
         this.postsRepository = postsRepository;
-        this.userRepository = userRepository;
+        this.usersRepository = usersRepository;
     }
 
+    @Transactional
     public PostsListResponse viewPostList(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Posts> postList = postsRepository.findPostList(pageable);
@@ -49,14 +45,16 @@ public class PostsService {
         );
     }
 
+    @Transactional
     public PostsDetailResponse viewPostDetail(Long postId) {
         Posts post = postsRepository.findPostDetailById(postId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));
         return PostsDetailResponse.of(post);
     }
 
+    @Transactional
     public PostsCreateResponse createPost(Long userId, PostsCreateRequest postsCreateRequest) {
-        Users user = userRepository.findByIdAndIsDeletedFalse(userId)
+        Users user = usersRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(()-> new UsersException.UsersNotFoundException("존재하지않는 유저입니다."));
 
         Posts post = Posts.builder()
@@ -97,6 +95,7 @@ public class PostsService {
     }
 
 
+    @Transactional
     public SimpleResponse editPost(Long postId, Long userId, PostsEditRequest postEditRequest) {
         Posts posts = postsRepository.findById(postId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));
@@ -108,6 +107,7 @@ public class PostsService {
         return SimpleResponse.forEditPost(userId, postId);
     }
 
+    @Transactional
     public SimpleResponse deletePost(Long postId, Long userId) {
         Posts posts = postsRepository.findById(postId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));

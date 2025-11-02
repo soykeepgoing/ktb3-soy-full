@@ -3,6 +3,7 @@ package com.soy.springcommunity.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import javax.xml.stream.events.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,6 +11,12 @@ import java.util.List;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NamedEntityGraph(
+        name = "Comments.withPosts",
+        attributeNodes = {
+                @NamedAttributeNode("post")
+        }
+)
 public class Comments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,9 +52,16 @@ public class Comments {
     private int commentDepth;
 
     @Builder
-    public Comments(String body){
+    public Comments(String body, Users user, Posts posts, Comments parentComments){
         this.body = body;
+        this.user = user;
+        this.post = posts;
+        this.parentComment = parentComments;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void updateCommentBody(String newBody) {
+        this.body = newBody;
     }
 }
 
