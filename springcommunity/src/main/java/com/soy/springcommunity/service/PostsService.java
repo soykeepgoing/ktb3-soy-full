@@ -35,7 +35,7 @@ public class PostsService {
     @Transactional
     public PostsListResponse viewPostList(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Posts> postList = postsRepository.findPostList(pageable);
+        Page<Posts> postList = postsRepository.findAll(pageable);
         List<PostsItemResponse> postsItemResponseList = postList.stream().map(PostsItemResponse::from).toList();
 
         PostsPagingMetaResponse pagingMetaResponse = PostsPagingMetaResponse.builder()
@@ -52,7 +52,7 @@ public class PostsService {
 
     @Transactional
     public PostsDetailResponse viewPostDetail(Long postId) {
-        Posts post = postsRepository.findPostDetailById(postId)
+        Posts post = postsRepository.findById(postId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));
         post.getPostStats().increaseViewCount();
         return PostsDetailResponse.of(post);
