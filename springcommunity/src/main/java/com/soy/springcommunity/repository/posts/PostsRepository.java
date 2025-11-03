@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface PostsRepository extends JpaRepository<Posts, Long> {
     Optional<Posts> findById(Long id);
     Page<Posts> findAll(Pageable pageable);
+    void deleteById(Long id);
 }

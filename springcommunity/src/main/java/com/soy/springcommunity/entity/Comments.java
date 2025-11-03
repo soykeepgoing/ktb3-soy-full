@@ -7,10 +7,11 @@ import javax.xml.stream.events.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
+
 @Getter
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "comments")
 @NamedEntityGraph(
         name = "Comments.withPosts",
         attributeNodes = {
@@ -37,7 +38,7 @@ public class Comments {
     @OneToMany(mappedBy = "parentComment")
     private List<Comments> childrenCommentList;
 
-    @OneToOne(mappedBy = "comment")
+    @OneToOne(mappedBy = "comment", cascade = CascadeType.REMOVE)
     private CommentStats commentStats;
 
     @Column(name = "body", nullable = false)

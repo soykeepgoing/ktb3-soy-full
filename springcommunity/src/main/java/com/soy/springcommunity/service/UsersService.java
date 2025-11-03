@@ -11,6 +11,7 @@ import com.soy.springcommunity.utils.PasswordUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,7 +33,7 @@ public class UsersService {
     }
 
     private boolean isEmailExist(String email) {
-        return usersRepository.findByEmail(email).isPresent();
+        return usersRepository.findByEmailAndIsDeletedFalse(email).isPresent();
     }
 
     private boolean isNicknameExist(String nickname) {
@@ -98,25 +99,9 @@ public class UsersService {
     }
 
     public void verifyPassword(Users users, String givenPassword){
-        if(!users.isPasswordMatch(givenPassword)){
+        if(!BCrypt.checkpw(givenPassword, users.getPasswordHash())){
             throw new UsersException.WrongPasswordException("잘못된 비밀번호입니다.");
         }
-    }
-
-    private Users getUserEntityByEmail(String email){
-        Users users = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
-
-        if (users.getIsDeleted()){
-            throw new UsersException.UsersNotFoundException("탈퇴한 유저입니다.");
-        }
-        return users;
-    }
-
-    private Users findActiveUserById(Long id){
-        Users users = usersRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
-        return users;
     }
 
     @Transactional
@@ -125,7 +110,8 @@ public class UsersService {
         String email = UsersSignInRequest.getUserEmail();
         String password = UsersSignInRequest.getUserPassword();
 
-        Users users = getUserEntityByEmail(email);
+        Users users = usersRepository.findByEmailAndIsDeletedFalse(email)
+                .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
         verifyPassword(users, password);
 
         Map<String,String> authInfoMap = getAuthInfoMap();
@@ -139,22 +125,20 @@ public class UsersService {
 
     @Transactional
     public UsersSimpleResponse editPassword(Long id, UsersEditPasswordRequest usersEditPasswordRequest) {
-        Users users = findActiveUserById(id);
+        Users users = usersRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
 
-        String oldPassword = PasswordUtil.getHashedPassword(
-                usersEditPasswordRequest.getUserOldPassword());
-        String newPassword = PasswordUtil.getHashedPassword(
-                usersEditPasswordRequest.getUserNewPassword());
+        String oldPassword = usersEditPasswordRequest.getUserOldPassword();
+        String newPassword = usersEditPasswordRequest.getUserNewPassword();
 
-        if (users.isPasswordMatch(oldPassword)) {
-            throw new UsersException.InvalidCurrentPasswordException("잘못된 비밀번호입니다.");
-        }
+        verifyPassword(users, oldPassword);
 
         if (newPassword.equals(oldPassword)) {
             throw new UsersException.SamePasswordException("현재 비밀번호와 새 비밀번호가 동일합니다.");
         }
 
-        users.updatePassword(newPassword);
+        String newPasswordHash = PasswordUtil.getHashedPassword(newPassword);
+        users.updatePassword(newPasswordHash);
 
         return new UsersSimpleResponse(
                 users.getId(),
@@ -164,10 +148,11 @@ public class UsersService {
 
     @Transactional
     public UsersSimpleResponse editProfile(Long id, UsersEditProfileRequest usersEditProfileRequest) {
-        Users users = findActiveUserById(id);
+        Users users = usersRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
 
-        String newNickname = usersEditProfileRequest.getNickname();
-        String newProfileImgUrl = usersEditProfileRequest.getProfileImgUrl();
+        String newNickname = usersEditProfileRequest.getUserNickname();
+        String newProfileImgUrl = usersEditProfileRequest.getUseeProfileImgUrl();
 
         if (newNickname.equals(users.getNickname())) {
             throw new UsersException.SameNicknameException("이전 닉네임과 동일합니다.");
@@ -177,8 +162,8 @@ public class UsersService {
             throw new UsersException.UsersNicknameAlreadyExistsException("존재하는 닉네임입니다.");
         }
 
-        if (newProfileImgUrl != "" & newProfileImgUrl.equals(users.getProfileImgUrl())) {
-            throw new UsersException.SameProfileImgException("이전 프로필 사진과 동일합니다.");
+        if (newProfileImgUrl == null){
+            newProfileImgUrl = users.getProfileImgUrl();
         }
 
         users.updateProfile(newNickname, newProfileImgUrl);
@@ -191,7 +176,8 @@ public class UsersService {
 
     @Transactional
     public UsersSimpleResponse softDelete(Long id) {
-        Users users = findActiveUserById(id);
+        Users users = usersRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
         users.softDelete();
 
         return new UsersSimpleResponse(

@@ -20,7 +20,6 @@ public class CommentStats {
 
     @Column(name = "like_count", nullable = false)
     private Long likeCount;
-
     @Column(name = "reply_count", nullable = false)
     private Long replyCount;
 
@@ -30,8 +29,8 @@ public class CommentStats {
         this.replyCount = replyCount;
     }
 
-    public CommentStats of(Comments comment, Long likeCount, Long replyCount) {
-        return new CommentStats(comment, likeCount, replyCount);
+    public static CommentStats createStats(Comments comment) {
+        return new CommentStats(comment, 0l, 0l);
     }
 
     public void increaseLikeCount() {

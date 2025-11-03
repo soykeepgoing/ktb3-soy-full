@@ -10,16 +10,15 @@ import org.hibernate.validator.constraints.URL;
 public class UsersEditProfileRequest {
     @NotBlank
     @Length(max= ConstantUtil.NICKNAME_MAX_LEN)
-    private String nickname;
+    private String userNickname;
     @URL(message= ConstantUtil.MSG_URL_NOT_VALID)
-    private String profileImgUrl;
+    private String useeProfileImgUrl;
     public UsersEditProfileRequest() {}
-    public UsersEditProfileRequest(String nickname){
-        this.nickname = nickname;
-        this.profileImgUrl = "";
+    public UsersEditProfileRequest(String userNickname){
+        this.userNickname = userNickname;
     }
-    public UsersEditProfileRequest(String nickname, String profileImgUrl) {
-        this.nickname = nickname;
-        this.profileImgUrl = profileImgUrl;
+    public UsersEditProfileRequest(String userNickname, String profileImgUrl) {
+        this.userNickname = userNickname;
+        this.useeProfileImgUrl = profileImgUrl;
     }
 }

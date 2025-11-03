@@ -39,10 +39,11 @@ public class Posts {
     @JoinColumn(name = "user_id")
     private Users user;
 
-    @OneToMany(mappedBy = "post")
+    // @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comments> comments;
 
-    @OneToOne(mappedBy = "post")
+    @OneToOne(mappedBy = "post", cascade = CascadeType.REMOVE)
     private PostStats postStats;
 
     @Column(name = "title", length = 26, nullable = false)
@@ -88,5 +89,8 @@ public class Posts {
         }
     }
 
+    public void updateModifiedAt(){
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

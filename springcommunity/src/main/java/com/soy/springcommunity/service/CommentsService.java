@@ -1,6 +1,7 @@
 package com.soy.springcommunity.service;
 
 import com.soy.springcommunity.dto.*;
+import com.soy.springcommunity.entity.CommentStats;
 import com.soy.springcommunity.entity.Comments;
 import com.soy.springcommunity.entity.Posts;
 import com.soy.springcommunity.entity.Users;
@@ -8,6 +9,7 @@ import com.soy.springcommunity.exception.CommentsException;
 import com.soy.springcommunity.exception.PostsException;
 import com.soy.springcommunity.exception.UsersException;
 import com.soy.springcommunity.repository.comments.CommentsRepository;
+import com.soy.springcommunity.repository.comments.CommentsStatsRepository;
 import com.soy.springcommunity.repository.posts.PostsRepository;
 import com.soy.springcommunity.repository.users.UsersRepository;
 import jakarta.transaction.Transactional;
@@ -21,14 +23,17 @@ public class CommentsService {
     private PostsRepository postsRepository;
     private UsersRepository usersRepository;
     private CommentsRepository commentsRepository;
+    private CommentsStatsRepository commentsStatsRepository;
 
     @Autowired
     public CommentsService(CommentsRepository commentsRepository,
                            UsersRepository usersRepository,
-                           PostsRepository postsRepository) {
+                           PostsRepository postsRepository,
+                           CommentsStatsRepository commentsStatsRepository) {
         this.commentsRepository = commentsRepository;
         this.usersRepository = usersRepository;
         this.postsRepository = postsRepository;
+        this.commentsStatsRepository = commentsStatsRepository;
     }
 
     public void ensureCommentMatchPost(Long commentPostId, Long postId) {
@@ -75,9 +80,12 @@ public class CommentsService {
                 .parentComments(parentComments)
                 .build();
 
+        CommentStats commentStats = CommentStats.createStats(comments);
         post.getPostStats().increaseCommentCount();
 
         commentsRepository.save(comments);
+        commentsStatsRepository.save(commentStats);
+
         return CommentsCreateResponse.of(postId);
     }
 

@@ -9,17 +9,23 @@ import com.soy.springcommunity.exception.UsersException;
 import com.soy.springcommunity.repository.posts.PostsRepository;
 import com.soy.springcommunity.repository.posts.PostsStatsReposiotry;
 import com.soy.springcommunity.repository.users.UsersRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class PostsService {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private PostsRepository postsRepository;
     private UsersRepository usersRepository;
     private PostsStatsReposiotry postsStatsReposiotry;
@@ -114,6 +120,7 @@ public class PostsService {
         editPostTitle(posts, postEditRequest.getPostTitle());
         editPostContent(posts, postEditRequest.getPostContent());
         editPostImgUrl(posts, postEditRequest.getPostImageUrl());
+        posts.updateModifiedAt();
         return SimpleResponse.forEditPost(userId, postId);
     }
 
@@ -122,7 +129,7 @@ public class PostsService {
         Posts posts = postsRepository.findById(postId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));
         ensureUserIsPostWriter(posts.getUser().getId(), userId);
-        postsRepository.delete(posts);
+        postsRepository.deleteById(postId);
         return SimpleResponse.forDeletePost(userId, postId);
     }
 

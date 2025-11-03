@@ -23,7 +23,7 @@ public class CommentsController {
     }
 
     @PostMapping("/api/posts/{postId}/comments")
-    public ResponseEntity<CommentsCreateResponse> createComments(CommentsCreateRequest createCommentRequest,
+    public ResponseEntity<CommentsCreateResponse> createComments(@RequestBody CommentsCreateRequest createCommentRequest,
                                                                  @PathVariable("postId") Long postId,
                                                                  @RequestParam Long userId,
                                                                  @RequestParam(value = "commentId" , required = false) Long parentCommentId) {
@@ -33,7 +33,7 @@ public class CommentsController {
     }
 
     @PatchMapping("/api/posts/{postId}/comments/{commentId}")
-    public ResponseEntity<SimpleResponse> editComments(CommentsEditRequest editCommentRequest,
+    public ResponseEntity<SimpleResponse> editComments(@RequestBody CommentsEditRequest editCommentRequest,
                                                        @PathVariable("postId") Long postId,
                                                        @PathVariable Long commentId,
                                                        @RequestParam Long userId){

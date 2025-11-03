@@ -15,17 +15,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PostLikesService implements LikesService {
+public class PostsLikeService implements LikesService {
     private PostsRepository postsRepository;
     private PostLikesRepository postsLikesRepository;
+    private UsersRepository usersRepository;
 
     @Autowired
-    public PostLikesService(
+    public PostsLikeService(
             PostLikesRepository postsLikesRepository,
             PostsRepository postsRepository,
             UsersRepository usersRepository) {
         this.postsLikesRepository = postsLikesRepository;
         this.postsRepository = postsRepository;
+        this.usersRepository = usersRepository;
+    }
+
+    protected String generateCompositeKey(Long postId, Long userId) {
+        return postId + "-" + userId;
     }
 
     @Transactional
@@ -38,7 +44,10 @@ public class PostLikesService implements LikesService {
         Posts posts = postsRepository.findById(contentId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));
 
-        PostLikes postLikes = PostLikes.of(posts, posts.getUser());
+        Users users = usersRepository.findById(userId)
+                .orElseThrow(() -> new UsersException.UsersNotFoundException("존재하지 않는 사용자입니다."));
+
+        PostLikes postLikes = PostLikes.of(posts, users);
         posts.getPostStats().increaseLikeCount();
         postsLikesRepository.save(postLikes);
         return LikesSimpleResponse.forLike(
@@ -54,7 +63,6 @@ public class PostLikesService implements LikesService {
         PostLikes checkPostLikes = postsLikesRepository.findByPostIdAndUserIdAndDeletedAtIsNull(contentId, userId)
                 .orElseThrow(()-> new LikesException.NotFoundException("좋아요 정보를 확인하세요"));
 
-        postsLikesRepository.delete(checkPostLikes);
         checkPostLikes.deleteLikes();
         checkPostLikes.getPost().getPostStats().decreaseLikeCount();
         return LikesSimpleResponse.forUnlike(

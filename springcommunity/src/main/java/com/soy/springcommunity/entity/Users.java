@@ -71,8 +71,4 @@ public class Users {
         this.profileImgUrl = newImgUrl;
         this.userDetail.setUpdatedAt();
     }
-
-    public boolean isPasswordMatch(String givenPasswordHash) {
-        return BCrypt.checkpw(this.passwordHash, givenPasswordHash);
-    }
 }
