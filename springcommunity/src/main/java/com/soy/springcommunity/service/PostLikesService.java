@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 public class PostLikesService implements LikesService {
     private PostsRepository postsRepository;
     private PostLikesRepository postsLikesRepository;
-    private UsersRepository usersRepository;
 
     @Autowired
     public PostLikesService(
@@ -27,22 +26,20 @@ public class PostLikesService implements LikesService {
             UsersRepository usersRepository) {
         this.postsLikesRepository = postsLikesRepository;
         this.postsRepository = postsRepository;
-        this.usersRepository = usersRepository;
     }
 
     @Transactional
     @Override
     public LikesSimpleResponse like(Long contentId, Long userId) {
-        PostLikes checkPostLikes = postsLikesRepository.findByPostIdAndUserId(contentId, userId)
-                .orElseThrow(()-> new LikesException.AlreadyLikedException("이미 좋아요한 게시글입니다."));
+        if (postsLikesRepository.existsByPostIdAndUserId(contentId, userId)) {
+            throw new LikesException.AlreadyLikedException("이미 좋아요한 게시글입니다.");
+        }
 
         Posts posts = postsRepository.findById(contentId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));
 
-        Users user = usersRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(()-> new UsersException.UsersNotFoundException("존재하지 않는 유저입니다."));
-
-        PostLikes postLikes = PostLikes.of(posts, user);
+        PostLikes postLikes = PostLikes.of(posts, posts.getUser());
+        posts.getPostStats().increaseLikeCount();
         postsLikesRepository.save(postLikes);
         return LikesSimpleResponse.forLike(
                 "post",
@@ -54,12 +51,12 @@ public class PostLikesService implements LikesService {
     @Transactional
     @Override
     public LikesSimpleResponse unlike(Long contentId, Long userId) {
-        PostLikes checkPostLikes = postsLikesRepository.findByPostIdAndUserId(contentId, userId)
+        PostLikes checkPostLikes = postsLikesRepository.findByPostIdAndUserIdAndDeletedAtIsNull(contentId, userId)
                 .orElseThrow(()-> new LikesException.NotFoundException("좋아요 정보를 확인하세요"));
-        if (checkPostLikes.getDeletedAt() == null) {
-            postsLikesRepository.delete(checkPostLikes);
-            checkPostLikes.deleteLikes();
-        }
+
+        postsLikesRepository.delete(checkPostLikes);
+        checkPostLikes.deleteLikes();
+        checkPostLikes.getPost().getPostStats().decreaseLikeCount();
         return LikesSimpleResponse.forUnlike(
                 "post",
                 contentId,

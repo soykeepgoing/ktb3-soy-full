@@ -46,7 +46,7 @@ public class CommentsService {
 
     @Transactional
     public CommentsViewResponse viewComments(Long postId) {
-        List<Comments> commentsEntities = commentsRepository.findCommentsByPostId(postId);
+        List<Comments> commentsEntities = commentsRepository.findByPostId(postId);
         return new CommentsViewResponse(commentsEntities);
     }
 
@@ -74,6 +74,8 @@ public class CommentsService {
                 .posts(post)
                 .parentComments(parentComments)
                 .build();
+
+        post.getPostStats().increaseCommentCount();
 
         commentsRepository.save(comments);
         return CommentsCreateResponse.of(postId);
@@ -104,7 +106,7 @@ public class CommentsService {
 
         ensureCommentMatchUser(comment.getUser().getId(), userId);
         ensureCommentMatchPost(comment.getPost().getId(), postId);
-
+        comment.getPost().getPostStats().decreaseCommentCount();
         commentsRepository.delete(comment);
         return SimpleResponse.forDeleteComment(userId, commentId);
     }

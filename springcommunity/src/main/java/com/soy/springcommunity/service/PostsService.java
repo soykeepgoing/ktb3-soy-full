@@ -1,11 +1,13 @@
 package com.soy.springcommunity.service;
 
 import com.soy.springcommunity.dto.*;
+import com.soy.springcommunity.entity.PostStats;
 import com.soy.springcommunity.entity.Posts;
 import com.soy.springcommunity.entity.Users;
 import com.soy.springcommunity.exception.PostsException;
 import com.soy.springcommunity.exception.UsersException;
 import com.soy.springcommunity.repository.posts.PostsRepository;
+import com.soy.springcommunity.repository.posts.PostsStatsReposiotry;
 import com.soy.springcommunity.repository.users.UsersRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,14 @@ import java.util.List;
 public class PostsService {
     private PostsRepository postsRepository;
     private UsersRepository usersRepository;
+    private PostsStatsReposiotry postsStatsReposiotry;
     @Autowired
     public PostsService(PostsRepository postsRepository,
-                        UsersRepository usersRepository) {
+                        UsersRepository usersRepository,
+                        PostsStatsReposiotry postsStatsReposiotry) {
         this.postsRepository = postsRepository;
         this.usersRepository = usersRepository;
+        this.postsStatsReposiotry = postsStatsReposiotry;
     }
 
     @Transactional
@@ -49,6 +54,7 @@ public class PostsService {
     public PostsDetailResponse viewPostDetail(Long postId) {
         Posts post = postsRepository.findPostDetailById(postId)
                 .orElseThrow(() -> new PostsException.PostsNotFoundException("존재하지 않는 게시글입니다."));
+        post.getPostStats().increaseViewCount();
         return PostsDetailResponse.of(post);
     }
 
@@ -63,7 +69,11 @@ public class PostsService {
                 .imgUrl(postsCreateRequest.getPostImageUrl())
                 .user(user).build();
 
+        PostStats postStats = PostStats.createStats(post);
+
         postsRepository.save(post);
+        postsStatsReposiotry.save(postStats);
+
         return PostsCreateResponse.of(post.getId());
 
     }

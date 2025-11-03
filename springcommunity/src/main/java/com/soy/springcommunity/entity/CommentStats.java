@@ -34,5 +34,13 @@ public class CommentStats {
         return new CommentStats(comment, likeCount, replyCount);
     }
 
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
+    }
+
 }
 

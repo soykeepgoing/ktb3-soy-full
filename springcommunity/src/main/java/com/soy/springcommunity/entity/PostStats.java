@@ -1,14 +1,12 @@
 package com.soy.springcommunity.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity
 @Table(name = "post_stats")
 public class PostStats {
@@ -27,10 +25,40 @@ public class PostStats {
     @Column(name = "comment_count", nullable = false)
     private Long commentCount;
 
-    @Builder
-    public PostStats(Long id, Long viewCount, Long likeCount, Long commentCount) {
+    private PostStats(Posts post, Long viewCount, Long likeCount, Long commentCount) {
+        this.post = post;
         this.viewCount = viewCount;
         this.likeCount = likeCount;
         this.commentCount = commentCount;
     }
+
+    public static PostStats createStats(Posts post) {
+        return new PostStats(
+                post,
+                0L,
+                0L,
+                0L
+        );
+    }
+
+    public void increaseViewCount(){
+        this.viewCount += 1;
+    }
+
+    public void increaseLikeCount(){
+        this.likeCount += 1;
+    }
+
+    public void decreaseLikeCount(){
+        this.commentCount -= 1;
+    }
+
+    public void increaseCommentCount(){
+        this.commentCount += 1;
+    }
+
+    public void decreaseCommentCount(){
+        this.commentCount -= 1;
+    }
+
 }
