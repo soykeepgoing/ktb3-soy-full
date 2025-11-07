@@ -3,7 +3,7 @@ package com.example.community.comments;
 import com.example.community.comments.dto.*;
 import com.example.community.comments.entity.Comments;
 import com.example.community.common.dto.SimpleResponse;
-import com.example.community.contents.comments.dto.*;
+import com.example.community.comments.dto.*;
 import com.example.community.posts.PostCsvRepository;
 import com.example.community.users.UserCsvRepository;
 import com.example.community.validator.DomainValidator;

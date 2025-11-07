@@ -1,7 +1,7 @@
 package com.example.community.posts;
 
 import com.example.community.common.dto.SimpleResponse;
-import com.example.community.contents.posts.dto.*;
+import com.example.community.posts.dto.*;
 import com.example.community.posts.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
