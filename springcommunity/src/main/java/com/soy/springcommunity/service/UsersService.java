@@ -141,7 +141,7 @@ public class UsersService {
         Map<String,String> authInfoMap = getAuthInfoMap();
 
         return new UsersSignInResponse(
-                users.getEmail(),
+                users.getId(),
                 authInfoMap.get("issuedAt"),
                 authInfoMap.get("expiresIn")
         );
