@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
+@CrossOrigin(origins = "http://127.0.0.1:5500/")
+@RequestMapping("/api/posts")
 public class PostsController {
     private PostsService postsService;
     @Autowired
@@ -19,7 +21,7 @@ public class PostsController {
         this.postsService = postsService;
     }
 
-    @GetMapping("/api/posts")
+    @GetMapping("")
     @Operation(summary = "게시글 목록 보기")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 목록 보기 성공")
@@ -29,7 +31,7 @@ public class PostsController {
         return ResponseEntity.ok(PostsListResponse);
     }
 
-    @GetMapping("/api/posts/detail/{postId}")
+    @GetMapping("/detail/{postId}")
     @Operation(summary = "게시글 상세 보기")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 상세 보기 성공")
@@ -39,7 +41,7 @@ public class PostsController {
         return ResponseEntity.ok(PostsDetailResponse);
     }
 
-    @PostMapping("/api/posts")
+    @PostMapping("")
     @Operation(summary = "게시글 생성")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "게시글 생성 성공")
@@ -51,7 +53,7 @@ public class PostsController {
                 .body(postCreateResponse);
     }
 
-    @PatchMapping("/api/posts/{postId}")
+    @PatchMapping("/{postId}")
     @Operation(summary = "게시글 수정")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "게시글 수정 성공")
@@ -61,7 +63,7 @@ public class PostsController {
         return ResponseEntity.ok(simpleResponse);
     }
 
-    @DeleteMapping("/api/posts/{postId}")
+    @DeleteMapping("/{postId}")
     @Operation(summary = "게시글 삭제")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 삭제 성공")
