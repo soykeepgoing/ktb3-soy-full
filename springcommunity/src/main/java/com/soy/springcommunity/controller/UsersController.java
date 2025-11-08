@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @CrossOrigin(origins = "http://127.0.0.1:5500/")
 @RequestMapping("/api/users")
@@ -27,7 +29,7 @@ public class UsersController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "가입 성공")
     })
-    public ResponseEntity<ApiCommonResponse<UsersSignUpResponse>> signUp(@Valid @RequestBody UsersSignUpRequest usersSignUpRequest) {
+    public ResponseEntity<ApiCommonResponse<UsersSignUpResponse>> signUp(@Valid @RequestBody UsersSignUpRequest usersSignUpRequest) throws IOException {
         UsersSignUpResponse signUpResponse = usersService.signup(usersSignUpRequest);
         return UsersApiResponse.created(
                 HttpStatus.OK,

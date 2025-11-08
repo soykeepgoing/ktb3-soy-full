@@ -15,10 +15,16 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class UsersService {
@@ -40,15 +46,33 @@ public class UsersService {
         return usersRepository.findByNickname(nickname).isPresent();
     }
 
-    private String checkAndSetProfileImage(String profileImgUrl) {
+    private String base64ToUrl(String base64Data) throws IOException {
+        // 이미지 데이터 변환
+        String[] parts = base64Data.split(",");
+        String imageData = parts.length > 1 ? parts[1] : parts[0];
+        byte[] decoded = Base64.getDecoder().decode(imageData);
+
+        // 파일 로컬 서버에 저장
+        String fileName = UUID.randomUUID() + ".png";
+        Path path = Paths.get("uploads/" + fileName);
+        Files.createDirectories(path.getParent());
+        Files.write(path, decoded);
+
+        // url 생성
+        String fileUrl = "http://localhost:8080/uploads/" + fileName;
+        return fileUrl;
+    }
+
+    private String checkAndSetProfileImage(String profileImgUrl) throws IOException {
         if (profileImgUrl == null || profileImgUrl.isBlank()) {
             return ConstantUtil.PATH_DEFAULT_PROFILE;
         }
-        return profileImgUrl;
+
+        return base64ToUrl(profileImgUrl);
     }
 
     @Transactional
-    public UsersSignUpResponse signup(UsersSignUpRequest usersSignUpRequest) {
+    public UsersSignUpResponse signup(UsersSignUpRequest usersSignUpRequest) throws IOException {
         String email = usersSignUpRequest.getUserEmail();
         String password = usersSignUpRequest.getUserPassword();
         String nickname = usersSignUpRequest.getUserNickname();
